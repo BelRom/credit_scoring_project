@@ -54,7 +54,7 @@ def test_validation_fails_on_nulls():
 def test_validation_fails_on_out_of_range_values():
     row = make_minimal_valid_row()
     row["AGE"] = 10  # too young
-    row["SEX"] = 3   # invalid category
+    row["SEX"] = 3  # invalid category
     df = pd.DataFrame([row])
 
     with pytest.raises(pa.errors.SchemaErrors):

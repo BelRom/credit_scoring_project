@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import os
 import warnings
+from pathlib import Path
+import pandas as pd
+from .validation_schema import raw_input_schema
 
 os.environ["DISABLE_PANDERA_IMPORT_WARNING"] = "True"
 warnings.filterwarnings(
@@ -9,12 +12,6 @@ warnings.filterwarnings(
     message=r"Importing pandas-specific classes and functions from the top-level pandera module.*",
     category=FutureWarning,
 )
-
-from pathlib import Path
-import pandas as pd
-import pandera.pandas as pa
-
-from .validation_schema import raw_input_schema
 
 
 def validate_raw(df: pd.DataFrame) -> pd.DataFrame:

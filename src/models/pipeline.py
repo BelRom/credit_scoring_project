@@ -9,7 +9,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier, HistGradientBoostingClassifier
+from sklearn.ensemble import (
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+    HistGradientBoostingClassifier,
+)
 
 
 SUPPORTED_MODELS = ("logreg", "gboost", "rf", "hgb")
@@ -85,7 +89,9 @@ def build_estimator(model_name: str, random_state: int = 50):
     raise ValueError(f"Unknown model_name={model_name}")
 
 
-def create_pipeline(model_name: str, X: pd.DataFrame, random_state: int = 50) -> Pipeline:
+def create_pipeline(
+    model_name: str, X: pd.DataFrame, random_state: int = 50
+) -> Pipeline:
     """Preprocessing + Model."""
     preprocessor = build_preprocessor(X)
     model = build_estimator(model_name, random_state=random_state)

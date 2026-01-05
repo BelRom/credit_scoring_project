@@ -1,0 +1,17 @@
+name: credit_default_checkpoint
+config_version: 1.0
+class_name: Checkpoint
+
+validations:
+  - batch_request:
+      datasource_name: local_files
+      data_connector_name: default_inferred_data_connector_name
+      data_asset_name: sample_credit
+    expectation_suite_name: credit_default_suite
+    action_list:
+      - name: store_validation_result
+        action:
+          class_name: StoreValidationResultAction
+      - name: store_evaluation_params
+        action:
+          class_name: StoreEvaluationParametersAction

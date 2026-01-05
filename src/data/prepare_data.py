@@ -2,8 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Tuple
-
 import numpy as np
 import pandas as pd
 
@@ -91,7 +89,14 @@ def primary_cleaning(df: pd.DataFrame) -> pd.DataFrame:
 
 def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     pay_cols = ["PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5", "PAY_6"]
-    bill_cols = ["BILL_AMT1", "BILL_AMT2", "BILL_AMT3", "BILL_AMT4", "BILL_AMT5", "BILL_AMT6"]
+    bill_cols = [
+        "BILL_AMT1",
+        "BILL_AMT2",
+        "BILL_AMT3",
+        "BILL_AMT4",
+        "BILL_AMT5",
+        "BILL_AMT6",
+    ]
     amt_cols = ["PAY_AMT1", "PAY_AMT2", "PAY_AMT3", "PAY_AMT4", "PAY_AMT5", "PAY_AMT6"]
 
     out = df.copy()
@@ -117,7 +122,9 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
     # Age binning
     bins = [0, 25, 35, 45, 55, 65, 120]
     labels = ["<=25", "26-35", "36-45", "46-55", "56-65", "65+"]
-    out["age_bin"] = pd.cut(out["AGE"], bins=bins, labels=labels, right=True, include_lowest=True)
+    out["age_bin"] = pd.cut(
+        out["AGE"], bins=bins, labels=labels, right=True, include_lowest=True
+    )
 
     # One-hot encode age_bin -> int8 (0/1)
     age_ohe = pd.get_dummies(
@@ -139,7 +146,9 @@ def finalize_dtypes(df: pd.DataFrame) -> pd.DataFrame:
 
     # target -> int8
     if "target" in out.columns:
-        out["target"] = pd.to_numeric(out["target"], errors="coerce").fillna(0).astype(np.int8)
+        out["target"] = (
+            pd.to_numeric(out["target"], errors="coerce").fillna(0).astype(np.int8)
+        )
 
     # any bool -> int8 (safety net)
     bool_cols = out.select_dtypes(include=["bool"]).columns.tolist()
@@ -162,7 +171,9 @@ def main() -> None:
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--raw_csv", type=str, required=True, help="Path to Kaggle CSV")
-    parser.add_argument("--out", type=str, required=True, help="Output path (.parquet recommended)")
+    parser.add_argument(
+        "--out", type=str, required=True, help="Output path (.parquet recommended)"
+    )
     args = parser.parse_args()
 
     df_prepared = prepare_dataset(Path(args.raw_csv))

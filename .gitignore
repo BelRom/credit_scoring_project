@@ -162,3 +162,5 @@ mlruns/
 # Models & artifacts
 models/*.joblib
 models/*.png
+
+gx/uncommitted/

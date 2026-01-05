@@ -10,9 +10,15 @@ import numpy as np
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", required=True, help="Path to trained joblib model.")
-    parser.add_argument("--data", required=True, help="Path to input CSV with features.")
-    parser.add_argument("--out", default="data/predictions.csv", help="Output CSV with predictions.")
+    parser.add_argument(
+        "--model-path", required=True, help="Path to trained joblib model."
+    )
+    parser.add_argument(
+        "--data", required=True, help="Path to input CSV with features."
+    )
+    parser.add_argument(
+        "--out", default="data/predictions.csv", help="Output CSV with predictions."
+    )
     parser.add_argument("--proba-threshold", type=float, default=0.5)
     args = parser.parse_args()
 
