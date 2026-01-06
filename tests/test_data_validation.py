@@ -8,7 +8,6 @@ from src.data.validate import validate_raw
 
 def make_minimal_valid_row() -> dict:
     return {
-        "ID": 1,
         "LIMIT_BAL": 20000,
         "SEX": 2,
         "EDUCATION": 2,

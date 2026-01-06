@@ -7,7 +7,6 @@ import pandas as pd
 
 
 RAW_COLUMNS = [
-    "ID",
     "LIMIT_BAL",
     "SEX",
     "EDUCATION",
@@ -42,47 +41,28 @@ class DataPaths:
 
 
 def load_raw_csv(path: Path) -> pd.DataFrame:
-    """
-    Load Kaggle CSV and normalize column names/target column.
-    Kaggle versions sometimes contain a header row with different naming,
-    but you specified the expected column names explicitly.
-    """
     df = pd.read_csv(path)
 
-    # If file contains unexpected column names, try to map them to expected ones
-    # (optional safety). Otherwise ensure required columns exist.
     missing = set(RAW_COLUMNS) - set(df.columns)
     if missing:
         raise ValueError(f"Missing columns in raw dataset: {sorted(missing)}")
 
-    # Keep only expected columns in the correct order
     df = df[RAW_COLUMNS].copy()
 
-    # Rename target to a cleaner name
     df = df.rename(columns={"default.payment.next.month": "target"})
 
     return df
 
 
 def primary_cleaning(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Primary cleaning:
-    - drop duplicates by ID (keep first)
-    - enforce numeric dtypes where possible
-    - basic category normalization for known 'unknown' values
-    """
-    df = df.drop_duplicates(subset=["ID"], keep="first").copy()
+    df = df.drop_duplicates(keep="first").copy()
 
-    # Convert everything numeric (dataset is numeric-coded)
     for col in df.columns:
         df[col] = pd.to_numeric(df[col], errors="coerce")
 
-    # Normalize known odd codes (typical for this dataset):
-    # EDUCATION: 0, 5, 6 often mean "others/unknown" in many implementations
-    df.loc[df["EDUCATION"].isin([0, 5, 6]), "EDUCATION"] = 4  # 4 = others
+    df.loc[df["EDUCATION"].isin([0, 5, 6]), "EDUCATION"] = 4
 
-    # MARRIAGE: 0 often means "others/unknown"
-    df.loc[df["MARRIAGE"].isin([0]), "MARRIAGE"] = 3  # 3 = others
+    df.loc[df["MARRIAGE"].isin([0]), "MARRIAGE"] = 3
 
     return df
 
@@ -131,26 +111,36 @@ def feature_engineering(df: pd.DataFrame) -> pd.DataFrame:
         out["age_bin"],
         prefix="age_bin",
         dummy_na=False,
-        dtype=np.int8,  # <-- ключевая правка
+        dtype=np.int8,
     )
+
+    EXPECTED_AGE_DUMMIES = [
+        "age_bin_<=25",
+        "age_bin_26-35",
+        "age_bin_36-45",
+        "age_bin_46-55",
+        "age_bin_56-65",
+        "age_bin_65+",
+    ]
+
+    for col in EXPECTED_AGE_DUMMIES:
+        if col not in age_ohe.columns:
+            age_ohe[col] = np.int8(0)
+
+    age_ohe = age_ohe[EXPECTED_AGE_DUMMIES]
     out = pd.concat([out.drop(columns=["age_bin"]), age_ohe], axis=1)
 
     return out
 
 
 def finalize_dtypes(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Final dtype normalization to avoid bool dtypes and keep dataset compact & sklearn-friendly.
-    """
     out = df.copy()
 
-    # target -> int8
     if "target" in out.columns:
         out["target"] = (
             pd.to_numeric(out["target"], errors="coerce").fillna(0).astype(np.int8)
         )
 
-    # any bool -> int8 (safety net)
     bool_cols = out.select_dtypes(include=["bool"]).columns.tolist()
     if bool_cols:
         out[bool_cols] = out[bool_cols].astype(np.int8)

@@ -1,0 +1,19 @@
+services:
+  api:
+    build: .
+    container_name: credit_api
+    environment:
+      - MODEL_PATH=models/best_model.joblib
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: .
+    container_name: credit_frontend
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
+    ports:
+      - "8501:8501"
+    command: ["streamlit", "run", "src/frontend/app.py", "--server.port", "8501", "--server.address", "0.0.0.0"]

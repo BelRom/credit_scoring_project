@@ -103,6 +103,9 @@ def main():
     if args.target not in df.columns:
         raise ValueError(f"Target column '{args.target}' not found in dataset columns.")
 
+    if "ID" in df.columns:
+        df = df.drop(columns=["ID"])
+
     X = df.drop(columns=[args.target])
     y = df[args.target].astype(int)
 

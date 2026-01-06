@@ -15,10 +15,6 @@ warnings.filterwarnings(
 
 
 def validate_raw(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Validates raw dataset. Raises pandera.errors.SchemaError on failure.
-    Returns validated (and type-coerced) dataframe.
-    """
     schema = raw_input_schema()
     return schema.validate(df, lazy=True)  # lazy=True collects all errors
 

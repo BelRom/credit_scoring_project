@@ -2,20 +2,28 @@ name: CI
 
 on:
   push:
+    branches: [ main, develop ]
   pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 1"  # понедельник 02:00 UTC
+
+env:
+  PYTHON_VERSION: "3.12"
+  GX_BASE_DIR: ${{ github.workspace }}
 
 jobs:
   test-lint-validate:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: "pip"
 
       - name: Install dependencies
@@ -24,19 +32,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: Black (format check)
-        run: |
-          black --check .
+        run: black --check .
 
       - name: Flake8 (lint)
-        run: |
-          flake8 .
+        run: flake8 src tests
 
       - name: Pytest
-        run: |
-          pytest -q --disable-warnings --maxfail=1
+        run: pytest -q --disable-warnings --maxfail=1
 
       - name: Great Expectations validation
-        env:
-          GX_BASE_DIR: ${{ github.workspace }}
-        run: |
-          great_expectations checkpoint run credit_default_checkpoint
+        run: great_expectations checkpoint run credit_default_checkpoint
